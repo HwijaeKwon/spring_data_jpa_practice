@@ -13,6 +13,8 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +31,9 @@ public class MemberRepositoryTest {
 
     @Autowired
     private TeamRepository teamRepository;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Test
     public void testMember() {
@@ -186,5 +191,34 @@ public class MemberRepositoryTest {
         assertThat(page.getTotalPages()).isEqualTo(2);
         assertThat(page.isFirst()).isTrue();
         assertThat(page.hasNext()).isTrue();
+    }
+
+    @Test
+    public void bulkUpdate() {
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 20));
+        memberRepository.save(new Member("member3", 30));
+        memberRepository.save(new Member("member4", 40));
+        memberRepository.save(new Member("member5", 50));
+
+        //when
+        int resultCount = memberRepository.bulkAgePlus(20);
+
+        //bulk연산에서 조심해야될 점
+        //bulk연산은 영속성 컨텍스트를 무시하고 DB에 바로 업데이트한다
+        //이로 인해 DB의 값과 영속성 컨텍스트의 값이 다를 수 있다
+        //이를 방지하기 위해서는 bulk 연산 이후 바로 flush, clear해서 영속성 컨텍스트를 날려야 한다
+        //em.flush();
+        //em.clear();
+        //스프링 데이터 JPA는 bulkUpdate이후 영속성 컨텍스트를 비우는 옵션을 줄 수 있다 -> Modifying(clearAutomatically = true)
+        //Modifying(clearAutomatically = true)를 하면 em.flush, em.clear를 하지 않아도 된다
+        //JDBC template이나 MyBatis를 이용할 경우, JPA가 감지할 수 없다 -> 영속성 컨텍스트와 DB 간의 차이가 생길 수 있다 -> em.flush, em.clear 필요
+
+        List<Member> result = memberRepository.findByUsername("member5");
+        Member member5 = result.get(0);
+        System.out.println("member5 = " + member5.getAge());
+
+        //then
+        assertThat(resultCount).isEqualTo(4);
     }
 }
