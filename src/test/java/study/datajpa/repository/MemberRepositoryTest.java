@@ -375,7 +375,12 @@ public class MemberRepositoryTest {
         em.clear();
 
         //when
-        Member result = memberRepository.findByNativeQuery("m1");
-        System.out.println("result = " + result);
+        Page<MemberProjection> result = memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+        List<MemberProjection> memberProjection = result.getContent();
+        memberProjection.forEach(member -> {
+            System.out.println("member = " + member.getId());
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member = " + member.getTeamName());
+        });
     }
 }
