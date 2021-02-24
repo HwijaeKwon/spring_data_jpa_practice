@@ -31,7 +31,7 @@ public class Item implements Persistable<String> {
 
     //id를 내가 직접 생성해서 넣어줘야 하는 경우, 혹은 id를 client한테 받아오는 경우
     //직접 isNew를 구현해야 한다
-    //createdDate의 null 유무를 통해 판단한다 (createdDate는 기본적으로 많이 사용하므로 이를 활용한다)
+    //createdDate의 null 유무를 통해 판단한다 (createdDate는 기본적으로 많이 사용하므로 이를 활용한다)   
     @Override
     public boolean isNew() {
         return createdDate == null;
